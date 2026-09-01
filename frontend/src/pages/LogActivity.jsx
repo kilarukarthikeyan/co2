@@ -12,34 +12,54 @@ export default function LogActivity() {
 
   const categories = [
     { name: 'Transport', icon: '🚗', color: 'text-green-600 bg-green-50 border-green-200', types: ['Car', 'Flight', 'Public Transit'], unit: 'km' },
-    { name: 'Electricity', icon: '⚡', color: 'text-blue-600 bg-blue-50 border-blue-200', types: ['Electricity Consumption'], unit: 'kWh' },
-    { name: 'Food', icon: '🍽️', color: 'text-orange-600 bg-orange-50 border-orange-200', types: ['Beef Meal', 'Chicken/Pork Meal', 'Vegetarian Meal', 'Vegan Meal'], unit: 'servings' },
-    { name: 'Shopping', icon: '🛍️', color: 'text-purple-600 bg-purple-50 border-purple-200', types: ['Clothing', 'Electronics', 'General Goods'], unit: 'USD' }
+    { name: 'Electricity', icon: '⚡', color: 'text-blue-600 bg-blue-50 border-blue-200', types: ['Grid', 'Solar'], unit: 'kWh' },
+    { name: 'Food', icon: '🍽️', color: 'text-orange-600 bg-orange-50 border-orange-200', types: ['Meat Meal', 'Vegan Meal'], unit: 'servings' },
+    { name: 'Shopping', icon: '🛍️', color: 'text-purple-600 bg-purple-50 border-purple-200', types: ['Clothing', 'Electronics'], unit: 'USD' }
+  ];
+
+  const quickLogs = [
+    { title: 'Commute - Car (15km)', cat: 'Transport', type: 'Car', qty: '15', memo: 'Daily work commute' },
+    { title: 'Veggie Meal (1 serving)', cat: 'Food', type: 'Vegan Meal', qty: '1', memo: 'Lunch' },
+    { title: 'Grid Usage (5 kWh)', cat: 'Electricity', type: 'Grid', qty: '5', memo: 'Daily average power' }
   ];
 
   const currentCategoryInfo = categories.find(c => c.name === activeTab);
 
-  // Simple local estimation logic just for UI preview
+  const calculateEstimate = (cat, val) => {
+    if (!val || val <= 0) return '0.00';
+    if(cat === 'Transport') return (parseFloat(val) * 0.192).toFixed(2);
+    else if(cat === 'Electricity') return (parseFloat(val) * 0.4).toFixed(2);
+    else if(cat === 'Food') return (parseFloat(val) * 2.5).toFixed(2);
+    else return (parseFloat(val) * 0.1).toFixed(2);
+  }
+
   const handleQuantityChange = (e) => {
     const val = e.target.value;
     setQuantity(val);
-    if(val) {
-        if(activeTab === 'Transport') setEstimate((parseFloat(val) * 0.192).toFixed(2));
-        else if(activeTab === 'Electricity') setEstimate((parseFloat(val) * 0.4).toFixed(2));
-        else if(activeTab === 'Food') setEstimate((parseFloat(val) * 2.5).toFixed(2));
-        else setEstimate((parseFloat(val) * 0.1).toFixed(2));
-    } else {
-        setEstimate('0.00');
-    }
+    setEstimate(calculateEstimate(activeTab, val));
   }
 
   const handleTabChange = (catName) => {
     setActiveTab(catName);
-    setType(categories.find(c => c.name === catName).types[0]);
+    const defaultType = categories.find(c => c.name === catName).types[0];
+    setType(defaultType);
+    setEstimate(calculateEstimate(catName, quantity));
+  }
+
+  const applyQuickLog = (ql) => {
+    setActiveTab(ql.cat);
+    setType(ql.type);
+    setQuantity(ql.qty);
+    setMemo(ql.memo);
+    setEstimate(calculateEstimate(ql.cat, ql.qty));
   }
 
   const handleLog = async (e) => {
     e.preventDefault();
+    if (parseFloat(quantity) <= 0) {
+      alert("Quantity must be greater than zero.");
+      return;
+    }
     setLoading(true);
     try {
       await api.post('/activities', {
@@ -50,13 +70,13 @@ export default function LogActivity() {
         logDate: logDate,
         memo: memo
       });
-      alert('Activity successfully logged to database!');
+      alert('Activity successfully logged!');
       setQuantity('');
       setEstimate('0.00');
       setMemo('');
     } catch (err) {
       console.error(err);
-      alert('Failed to log activity. Ensure emission factors exist in DB.');
+      alert('Failed to log activity. Ensure DB has factors.');
     } finally {
       setLoading(false);
     }
@@ -65,8 +85,21 @@ export default function LogActivity() {
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Log New Activity</h1>
+        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Log Activity</h1>
         <p className="text-gray-500 mt-1 font-medium">Record daily actions to calculate your real-time footprint.</p>
+      </div>
+
+      {/* Quick-Log Carousel */}
+      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+        <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Quick Log Frequent Activities</h4>
+        <div className="flex gap-4 overflow-x-auto pb-2">
+          {quickLogs.map((ql, idx) => (
+            <button key={idx} onClick={() => applyQuickLog(ql)} className="flex-shrink-0 px-5 py-3.5 bg-gray-50 hover:bg-green-50 hover:border-green-200 border border-transparent rounded-2xl text-left text-sm font-semibold transition-all">
+              <span className="block text-gray-900">{ql.title}</span>
+              <span className="text-xs text-gray-400 font-medium block mt-0.5">{ql.memo}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
@@ -97,7 +130,7 @@ export default function LogActivity() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-gray-700">Quantity ({currentCategoryInfo.unit})</label>
-                <input type="number" step="0.1" required placeholder="e.g. 20" value={quantity} onChange={handleQuantityChange} className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-4 focus:ring-green-50 focus:border-green-500 font-medium transition-all" />
+                <input type="number" step="0.1" required min="0.1" placeholder="e.g. 20" value={quantity} onChange={handleQuantityChange} className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-4 focus:ring-green-50 focus:border-green-500 font-medium transition-all" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

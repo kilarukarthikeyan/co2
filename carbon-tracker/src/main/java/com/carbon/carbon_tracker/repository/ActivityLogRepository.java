@@ -20,4 +20,10 @@ public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> 
 
     @Query("SELECT a.user.id, SUM(a.calculatedCo2e) FROM ActivityLog a GROUP BY a.user.id")
     List<Object[]> sumCalculatedCo2eGroupByUser();
+
+    @Query("SELECT a.user.id, SUM(a.calculatedCo2e) FROM ActivityLog a WHERE a.logDate BETWEEN :startDate AND :endDate GROUP BY a.user.id")
+    List<Object[]> sumCalculatedCo2eGroupByUserAndDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT a.activityType, SUM(a.calculatedCo2e) FROM ActivityLog a WHERE a.user.id = :userId AND a.logDate >= :since GROUP BY a.activityType ORDER BY SUM(a.calculatedCo2e) DESC")
+    List<Object[]> findTopEmissionActivities(@Param("userId") Long userId, @Param("since") LocalDate since);
 }

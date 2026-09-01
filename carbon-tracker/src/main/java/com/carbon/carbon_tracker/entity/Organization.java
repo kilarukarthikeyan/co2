@@ -13,6 +13,12 @@ public class Organization {
     private String name;
     private String description;
     
+    @Column(name = "join_token")
+    private String joinToken;
+
+    @Column(name = "sustainability_target")
+    private Double sustainabilityTarget;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
     
@@ -23,6 +29,10 @@ public class Organization {
     public void setName(String name) { this.name = name; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    public String getJoinToken() { return joinToken; }
+    public void setJoinToken(String joinToken) { this.joinToken = joinToken; }
+    public Double getSustainabilityTarget() { return sustainabilityTarget; }
+    public void setSustainabilityTarget(Double sustainabilityTarget) { this.sustainabilityTarget = sustainabilityTarget; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

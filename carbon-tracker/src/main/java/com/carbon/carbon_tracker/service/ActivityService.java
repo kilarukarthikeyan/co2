@@ -7,6 +7,8 @@ import com.carbon.carbon_tracker.entity.User;
 import com.carbon.carbon_tracker.repository.ActivityLogRepository;
 import com.carbon.carbon_tracker.repository.EmissionFactorRepository;
 import com.carbon.carbon_tracker.repository.UserRepository;
+import com.carbon.carbon_tracker.event.ActivityLoggedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +21,13 @@ public class ActivityService {
     private final ActivityLogRepository activityLogRepository;
     private final EmissionFactorRepository emissionFactorRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public ActivityService(ActivityLogRepository activityLogRepository, EmissionFactorRepository emissionFactorRepository, UserRepository userRepository) {
+    public ActivityService(ActivityLogRepository activityLogRepository, EmissionFactorRepository emissionFactorRepository, UserRepository userRepository, ApplicationEventPublisher eventPublisher) {
         this.activityLogRepository = activityLogRepository;
         this.emissionFactorRepository = emissionFactorRepository;
         this.userRepository = userRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     public ActivityLog logActivity(String email, ActivityRequest request) {
@@ -44,7 +48,9 @@ public class ActivityService {
         log.setCalculatedCo2e(calculatedCo2e);
         log.setMemo(request.getMemo());
 
-        return activityLogRepository.save(log);
+        ActivityLog saved = activityLogRepository.save(log);
+        eventPublisher.publishEvent(new ActivityLoggedEvent(this, saved));
+        return saved;
     }
 
     public List<ActivityLog> getUserActivities(String email) {

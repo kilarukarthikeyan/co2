@@ -8,6 +8,8 @@ import Goals from './pages/Goals';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
 import OrganizationDashboard from './pages/OrganizationDashboard';
+import OrganizationEmployees from './pages/OrganizationEmployees';
+import OrganizationSettings from './pages/OrganizationSettings';
 import DashboardLayout from './layouts/DashboardLayout';
 
 function ProtectedRoute({ children, allowedRole }) {
@@ -33,7 +35,11 @@ export default function App() {
           <Route path="/goals" element={<ProtectedRoute allowedRole="USER"><Goals /></ProtectedRoute>} />
           <Route path="/leaderboard" element={<ProtectedRoute allowedRole="USER"><Leaderboard /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          
+          {/* Org Routes */}
           <Route path="/organization" element={<ProtectedRoute allowedRole="ORGANIZATION"><OrganizationDashboard /></ProtectedRoute>} />
+          <Route path="/organization/employees" element={<ProtectedRoute allowedRole="ORGANIZATION"><OrganizationEmployees /></ProtectedRoute>} />
+          <Route path="/organization/settings" element={<ProtectedRoute allowedRole="ORGANIZATION"><OrganizationSettings /></ProtectedRoute>} />
         </Route>
       </Routes>
     </Router>

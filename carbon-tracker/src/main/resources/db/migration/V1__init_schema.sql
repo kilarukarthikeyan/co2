@@ -13,6 +13,7 @@ CREATE TABLE users (
     role VARCHAR(50) NOT NULL,
     organization_id BIGINT,
     sustainability_preferences JSON,
+    notification_preferences TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user_org FOREIGN KEY (organization_id) REFERENCES organizations(id)
 );

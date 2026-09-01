@@ -28,4 +28,9 @@ public class AnalyticsController {
     public ResponseEntity<List<Object[]>> getCategories(Authentication auth) {
         return ResponseEntity.ok(analyticsService.getCategoryBreakdown(auth.getName()));
     }
+
+    @GetMapping("/recommendations")
+    public ResponseEntity<List<String>> getRecommendations(Authentication auth) {
+        return ResponseEntity.ok(analyticsService.getRecommendations(auth.getName()));
+    }
 }

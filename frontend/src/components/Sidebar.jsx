@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, History, Target, Trophy, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, History, Target, Trophy, User, LogOut, Users, Settings } from 'lucide-react';
 
 export default function Sidebar() {
   const location = useLocation();
@@ -16,6 +16,8 @@ export default function Sidebar() {
 
   const orgLinks = [
     { name: 'Org Dashboard', path: '/organization', icon: LayoutDashboard },
+    { name: 'Employee Reports', path: '/organization/employees', icon: Users },
+    { name: 'Org Settings', path: '/organization/settings', icon: Settings },
     { name: 'Profile', path: '/profile', icon: User },
   ];
 
