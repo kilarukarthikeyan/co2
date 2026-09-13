@@ -54,7 +54,19 @@ public class ActivityService {
     }
 
     public List<ActivityLog> getUserActivities(String email) {
+        return getUserActivities(email, null, null);
+    }
+
+    public List<ActivityLog> getUserActivities(String email, java.time.LocalDate startDate, java.time.LocalDate endDate) {
         User user = userRepository.findByEmail(email).orElseThrow();
+        if (startDate != null && endDate != null) {
+            if (startDate.isAfter(endDate)) {
+                java.time.LocalDate temp = startDate;
+                startDate = endDate;
+                endDate = temp;
+            }
+            return activityLogRepository.findByUserIdAndDateRange(user.getId(), startDate, endDate);
+        }
         return activityLogRepository.findByUserIdOrderByLogDateDesc(user.getId());
     }
 

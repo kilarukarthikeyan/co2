@@ -24,8 +24,11 @@ public class ActivityController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ActivityLog>> getActivities(Authentication auth) {
-        return ResponseEntity.ok(activityService.getUserActivities(auth.getName()));
+    public ResponseEntity<List<ActivityLog>> getActivities(
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
+            Authentication auth) {
+        return ResponseEntity.ok(activityService.getUserActivities(auth.getName(), startDate, endDate));
     }
 
     @DeleteMapping("/{id}")
