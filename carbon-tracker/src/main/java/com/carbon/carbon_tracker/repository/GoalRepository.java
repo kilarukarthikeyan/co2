@@ -7,4 +7,5 @@ import java.util.Optional;
 public interface GoalRepository extends JpaRepository<Goal, Long> {
     Optional<Goal> findFirstByUserIdAndStatusOrderByCreatedAtDesc(Long userId, String status);
     List<Goal> findByUserId(Long userId);
+    void deleteByUserId(Long userId);
 }

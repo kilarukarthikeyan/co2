@@ -35,4 +35,27 @@ public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> 
 
     @Query("SELECT a FROM ActivityLog a WHERE a.user.id = :userId AND a.logDate BETWEEN :startDate AND :endDate ORDER BY a.logDate DESC, a.id DESC")
     List<ActivityLog> findByUserIdAndDateRange(@Param("userId") Long userId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    long countByLogDate(LocalDate logDate);
+
+    long countByUserId(Long userId);
+
+    @Query("SELECT SUM(a.calculatedCo2e) FROM ActivityLog a")
+    Double sumCalculatedCo2eTotal();
+
+    @Query("SELECT SUM(a.calculatedCo2e) FROM ActivityLog a WHERE a.logDate BETWEEN :startDate AND :endDate")
+    Double sumCalculatedCo2eByDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT a.logDate, SUM(a.calculatedCo2e) FROM ActivityLog a WHERE a.logDate BETWEEN :startDate AND :endDate GROUP BY a.logDate ORDER BY a.logDate ASC")
+    List<Object[]> sumCalculatedCo2eGroupByDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT a.category, SUM(a.calculatedCo2e) FROM ActivityLog a GROUP BY a.category")
+    List<Object[]> sumCalculatedCo2eGroupByCategoryAllUsers();
+
+    @Query("SELECT a.user.id, a.user.name, a.user.email, SUM(a.calculatedCo2e) FROM ActivityLog a WHERE a.logDate = :logDate GROUP BY a.user.id, a.user.name, a.user.email")
+    List<Object[]> sumCalculatedCo2eGroupByUserForDate(@Param("logDate") LocalDate logDate);
+
+    List<ActivityLog> findAllByOrderByLogDateDescIdDesc();
+
+    void deleteByUserId(Long userId);
 }
