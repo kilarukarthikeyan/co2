@@ -19,10 +19,14 @@ import java.util.List;
 public class GoalController {
     private final GoalRepository goalRepository;
     private final UserRepository userRepository;
+    private final com.carbon.carbon_tracker.service.EmailService emailService;
 
-    public GoalController(GoalRepository goalRepository, UserRepository userRepository) {
+    public GoalController(GoalRepository goalRepository, 
+                          UserRepository userRepository, 
+                          com.carbon.carbon_tracker.service.EmailService emailService) {
         this.goalRepository = goalRepository;
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     @GetMapping
@@ -38,8 +42,7 @@ public class GoalController {
         Goal goal = new Goal();
         goal.setUser(user);
         goal.setTargetReductionPercentage(request.getTargetReductionPercentage());
-        // For simplicity, baseline is set to a constant or monthly average, e.g., 120kg.
-        // Target value is calculated based on target reduction percentage.
+        // Baseline reference: 120kg
         double baseline = 120.0; 
         double targetVal = baseline * (1.0 - (request.getTargetReductionPercentage().doubleValue() / 100.0));
         goal.setTargetValue(java.math.BigDecimal.valueOf(targetVal));
@@ -47,6 +50,9 @@ public class GoalController {
         goal.setEndDate(request.getEndDate());
         goal.setStatus("ACTIVE");
 
-        return ResponseEntity.ok(goalRepository.save(goal));
+        Goal saved = goalRepository.save(goal);
+        emailService.sendGoalCreatedEmail(user, saved);
+
+        return ResponseEntity.ok(saved);
     }
 }
